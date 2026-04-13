@@ -1,0 +1,15 @@
+{
+  "name": "CrowdSense Arena",
+  "zones": [
+    { "id": "A1", "label": "North Stand" },
+    { "id": "A2", "label": "South Stand" },
+    { "id": "B1", "label": "Food Court" },
+    { "id": "B2", "label": "Washrooms" },
+    { "id": "C1", "label": "Gate 1" },
+    { "id": "C2", "label": "Gate 2" }
+  ],
+  "exits": [
+    { "id": "E1", "label": "North Exit" },
+    { "id": "E2", "label": "South Exit" }
+  ]
+}

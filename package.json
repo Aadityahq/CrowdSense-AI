@@ -1,0 +1,24 @@
+{
+  "name": "crowdsense-ai",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "kill-ports": "lsof -tiTCP:5001 -sTCP:LISTEN | xargs kill -9 2>/dev/null || true; lsof -tiTCP:5173 -sTCP:LISTEN | xargs kill -9 2>/dev/null || true; lsof -tiTCP:5174 -sTCP:LISTEN | xargs kill -9 2>/dev/null || true; lsof -tiTCP:5175 -sTCP:LISTEN | xargs kill -9 2>/dev/null || true",
+    "dev": "npm run kill-ports && concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w client && npm run build -w server",
+    "start": "npm run start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "firebase-tools": "^15.14.0"
+  },
+  "dependencies": {
+    "firebase": "^12.12.0"
+  }
+}
