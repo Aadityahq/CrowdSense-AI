@@ -32,8 +32,8 @@ function normalizeQueue(value, zoneType = 'seat', fallbackDensity = 0) {
 function buildSnapshot() {
   return stadiumZones.map((zone) => ({
     ...zone,
-    density: Math.floor(Math.random() * 100),
-    queue: zone.type === 'service' ? Math.floor(Math.random() * 24) + 2 : Math.floor(Math.random() * 10),
+    density: Math.max(5, Math.min(95, 30 + (zone.capacity % 40))),
+    queue: zone.type === 'service' ? Math.max(2, Math.min(24, Math.round(zone.capacity / 25))) : Math.max(1, Math.min(10, Math.round(zone.capacity / 100))),
   }));
 }
 
@@ -85,6 +85,7 @@ export function CrowdProvider({ children }) {
   const [zones, setZones] = useState(buildSnapshot());
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const fallbackPollMs = Number(import.meta.env.VITE_CROWD_POLL_INTERVAL_MS || 15000);
 
   useEffect(() => {
     let mounted = true;
@@ -121,12 +122,12 @@ export function CrowdProvider({ children }) {
         },
         () => {
           refreshFromApi();
-          timer = setInterval(refreshFromApi, 3000);
+          timer = setInterval(refreshFromApi, fallbackPollMs);
         },
       );
     } else {
       refreshFromApi();
-      timer = setInterval(refreshFromApi, 3000);
+      timer = setInterval(refreshFromApi, fallbackPollMs);
     }
 
     return () => {

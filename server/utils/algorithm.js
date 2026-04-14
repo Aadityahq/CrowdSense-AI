@@ -6,7 +6,7 @@ function calculateRoute(nodes, crowdMap) {
   return nodes
     .map((node) => ({
       node,
-      cost: (crowdMap[node] || 0) + Math.floor(Math.random() * 10),
+      cost: crowdMap[node] || 0,
     }))
     .sort((a, b) => a.cost - b.cost)
     .slice(0, 4)

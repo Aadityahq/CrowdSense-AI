@@ -4,6 +4,30 @@
 
 ### Night
 
+- Bug ID: BUG-006
+  - Title: Real-time crowd data was updating too fast
+  - Severity: Medium
+  - Files:
+    1. server/services/crowdService.js
+    2. server/server.js
+    3. client/src/context/CrowdContext.jsx
+    4. server/utils/helpers.js
+    5. server/utils/algorithm.js
+  - Reproduction:
+    1. Open the map or emergency screens while the dev stack is running.
+    2. Observe crowd values and route suggestions changing every few seconds.
+  - Expected: Live values should drift gradually, not jump aggressively on every refresh.
+  - Actual: Backend regenerated fully random crowd data on each sync tick, and client fallback polling refreshed quickly.
+  - Fix Applied:
+    1. Reduced backend auto-sync interval from 3 seconds to 15 seconds.
+    2. Replaced full-random crowd regeneration with small drift from the previous snapshot.
+    3. Slowed client fallback polling to 15 seconds.
+    4. Removed random cost noise from route scoring so route suggestions stay stable.
+  - Verification:
+    1. Frontend build passes.
+    2. Full dev stack starts successfully.
+  - Status: Fixed and verified (build/startup-level).
+
 - Bug ID: BUG-005
   - Title: Login profile fetch failed from email-keyed user docs causing offline-style Firestore errors
   - Severity: High

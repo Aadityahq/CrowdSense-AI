@@ -33,7 +33,7 @@ app.use((err, req, res, next) => {
 connectDatabase();
 
 if (process.env.FIRESTORE_AUTO_SYNC !== 'false') {
-  const syncIntervalMs = Number(process.env.FIRESTORE_SYNC_INTERVAL_MS || 3000);
+  const syncIntervalMs = Number(process.env.FIRESTORE_SYNC_INTERVAL_MS || 15000);
   let firestoreSyncDisabled = false;
   let firestoreSyncNoticeLogged = false;
 

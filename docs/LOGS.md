@@ -115,6 +115,8 @@
 	- Added root script `kill-ports` to safely clear stale listeners on `5001`, `5173`, `5174`, and `5175`.
 	- Updated root `dev` script to run `kill-ports` before launching server/client concurrently.
 	- Corrected `client/.env` API base URL back to `http://localhost:5001` (it was incorrectly set to Vite port `5175`).
+	- Reduced real-time crowd churn by slowing sync/poll intervals to `15s` and switching crowd updates to small drift instead of full random regeneration.
+	- Removed random noise from route scoring so recommendations stay stable between refreshes.
 
 ## Notes
 
