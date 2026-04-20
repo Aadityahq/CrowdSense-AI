@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth, hasFirebaseConfig } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db, hasFirebaseConfig } from '../firebase';
 
 const links = [
   { to: '/', label: 'Home' },
@@ -21,7 +22,7 @@ export default function Navbar() {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsLoggedIn(Boolean(user && user.emailVerified));
 
       if (!user) {
@@ -42,7 +43,43 @@ export default function Navbar() {
 
       try {
         const profile = JSON.parse(localStorage.getItem('crowdsense_user') || '{}');
-        setRole((profile?.role || '').toUpperCase());
+        const localRole = (profile?.role || '').toUpperCase();
+        if (localRole) {
+          setRole(localRole);
+          return;
+        }
+
+        if (db) {
+          // Resolve from Firestore so dashboard links are available even after refresh/new session.
+          const uidProfileSnap = await getDoc(doc(db, 'users', user.uid));
+          if (uidProfileSnap.exists()) {
+            const remoteRole = (uidProfileSnap.data()?.role || 'USER').toUpperCase();
+            setRole(remoteRole);
+            localStorage.setItem('role', remoteRole);
+            localStorage.setItem('crowdsense_user', JSON.stringify({
+              email: user.email || '',
+              role: remoteRole,
+            }));
+            return;
+          }
+
+          const emailKey = (user.email || '').trim();
+          if (emailKey) {
+            const legacyProfileSnap = await getDoc(doc(db, 'users', emailKey));
+            if (legacyProfileSnap.exists()) {
+              const legacyRole = (legacyProfileSnap.data()?.role || 'USER').toUpperCase();
+              setRole(legacyRole);
+              localStorage.setItem('role', legacyRole);
+              localStorage.setItem('crowdsense_user', JSON.stringify({
+                email: user.email || emailKey,
+                role: legacyRole,
+              }));
+              return;
+            }
+          }
+        }
+
+        setRole('USER');
       } catch (error) {
         setRole('');
       }
@@ -83,8 +120,8 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
-          {isLoggedIn && role === 'ADMIN' ? <NavLink to="/admin">Admin</NavLink> : null}
-          {isLoggedIn && role === 'ORGANIZER' ? <NavLink to="/organizer">Organizer</NavLink> : null}
+          {isLoggedIn && role === 'ADMIN' ? <NavLink to="/admin">Admin Dashboard</NavLink> : null}
+          {isLoggedIn && role === 'ORGANIZER' ? <NavLink to="/organizer">Organizer Dashboard</NavLink> : null}
           {!isLoggedIn ? <NavLink to="/login">Login/SignUp</NavLink> : null}
           {isLoggedIn ? (
             <button type="button" className="secondary-btn navbar-logout-btn" onClick={handleLogout}>
