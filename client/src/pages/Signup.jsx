@@ -8,7 +8,6 @@ export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('USER');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -32,7 +31,7 @@ export default function Signup() {
         uid: createdUser.uid,
         name,
         email: createdUser.email || email,
-        role,
+        role: 'USER',
         createdAt: new Date().toISOString(),
       });
 
@@ -40,7 +39,6 @@ export default function Signup() {
       setName('');
       setEmail('');
       setPassword('');
-      setRole('USER');
     } catch (requestError) {
       setError(requestError.message || 'Signup failed');
     } finally {
@@ -52,7 +50,7 @@ export default function Signup() {
     <main className="page">
       <section className="panel login-panel">
         <h2>Sign Up</h2>
-        <p>Create an account and assign role profile in Firestore.</p>
+        <p>Create an attendee account. Organizer and admin roles are managed securely by admins.</p>
 
         <form className="stack" onSubmit={handleSignup}>
           <label className="field">
@@ -68,15 +66,6 @@ export default function Signup() {
           <label className="field">
             Password
             <input value={password} onChange={(event) => setPassword(event.target.value)} className="login-input" type="password" required />
-          </label>
-
-          <label className="field">
-            Role
-            <select value={role} onChange={(event) => setRole(event.target.value)} className="login-input">
-              <option value="USER">USER</option>
-              <option value="ADMIN">ADMIN</option>
-              <option value="ORGANIZER">ORGANIZER</option>
-            </select>
           </label>
 
           {error ? <p className="error-text">{error}</p> : null}

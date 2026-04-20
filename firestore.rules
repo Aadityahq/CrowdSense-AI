@@ -12,8 +12,19 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "ADMIN";
     }
 
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function roleUnchanged() {
+      return request.resource.data.role == resource.data.role;
+    }
+
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isSelf(userId) || isAdmin();
+      allow create: if isSelf(userId) && request.resource.data.role == "USER";
+      allow update: if (isSelf(userId) && roleUnchanged()) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /crowd_zones/{zoneId} {
