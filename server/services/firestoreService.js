@@ -1,5 +1,5 @@
 const { initializeFirebaseAdmin } = require('../config/firebase');
-const stadiumLayout = require('../../shared/stadiumLayout.json');
+const stadiumLayout = require('../shared/stadiumLayout.json');
 
 let firestore = null;
 

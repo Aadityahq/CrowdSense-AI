@@ -1,4 +1,4 @@
-const stadiumLayout = require('../../shared/stadiumLayout.json');
+const stadiumLayout = require('../shared/stadiumLayout.json');
 const { calculateRoute } = require('../utils/algorithm');
 const { buildCrowdMap } = require('../utils/helpers');
 

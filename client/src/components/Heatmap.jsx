@@ -34,9 +34,11 @@ export default function Heatmap({ zones = [], route = [], height = 540, compact 
     .map((nodeId) => stadiumNodeMap[nodeId])
     .filter(Boolean)
     .map((zone) => [zone.lat, zone.lng]);
+  const accessibleSummary = `${zones.length} monitored zones, ${route.length} route points, ${routeCoordinates.length > 1 ? 'route path available' : 'route path unavailable'}.`;
 
   return (
-    <div className={`map-shell ${compact ? 'compact' : ''}`} style={{ height }}>
+    <div className={`map-shell ${compact ? 'compact' : ''}`} style={{ height }} aria-label="Crowd heatmap and route visualization" role="region">
+      <p className="sr-only">{accessibleSummary}</p>
       <MapContainer center={stadiumCenter} zoom={17} scrollWheelZoom={false} className="stadium-map">
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
@@ -81,7 +83,7 @@ export default function Heatmap({ zones = [], route = [], height = 540, compact 
         ) : null}
       </MapContainer>
 
-      <div className="map-legend">
+      <div className="map-legend" aria-label="Crowd density legend">
         <span className="badge red">High crowd</span>
         <span className="badge yellow">Medium crowd</span>
         <span className="badge green">Low crowd</span>

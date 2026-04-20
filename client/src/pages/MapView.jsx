@@ -18,6 +18,7 @@ export default function MapView() {
   const queueAverage = Math.round(zones.reduce((sum, zone) => sum + zone.queue, 0) / zones.length);
   const trend = useMemo(() => predictTrend(history), [history]);
   const crowdScore = Math.max(0, Math.min(100, Math.round(100 - crowdAverage * 0.75 - queueAverage * 1.2)));
+  const routeText = route.path.length ? route.path.join(' → ') : 'No safe route available';
 
   useEffect(() => {
     if (!Number.isFinite(crowdAverage)) return;
@@ -40,11 +41,11 @@ export default function MapView() {
   }
 
   return (
-    <main className="map-dashboard">
+    <main className="map-dashboard" aria-labelledby="map-view-title">
       <aside className="map-sidebar">
         <div>
           <span className="badge blue-badge">CrowdSense AI</span>
-          <h2>Smart stadium navigation</h2>
+          <h2 id="map-view-title">Smart stadium navigation</h2>
           <p>Use the least crowded path and keep moving with real-time crowd awareness.</p>
         </div>
 
@@ -101,6 +102,9 @@ export default function MapView() {
       </aside>
 
       <section className="map-stage">
+        <div className="sr-only" aria-live="polite">
+          {`Crowd average ${Number.isFinite(crowdAverage) ? crowdAverage : 0} percent. Queue average ${Number.isFinite(queueAverage) ? queueAverage : 0} minutes. Trend ${trend}. Route ${routeText}.`}
+        </div>
         <Heatmap zones={zones} route={route.path} height={560} />
 
         <div className="floating-status">
@@ -111,7 +115,7 @@ export default function MapView() {
 
         <div className="route-summary-card">
           <span className="badge green">Optimized route</span>
-          <h3>{route.path.join(' → ')}</h3>
+          <h3>{routeText}</h3>
           <p>Weighted by distance and live crowd density.</p>
           <div className="route-meta-row">
             <span>Route cost</span>

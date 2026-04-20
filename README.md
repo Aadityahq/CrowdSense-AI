@@ -2,6 +2,8 @@
 
 CrowdSense AI is a full-stack smart event management platform for stadiums and large venues. It combines Firebase Authentication, Firestore real-time updates, and weighted route guidance to reduce congestion, improve navigation, and support emergency response.
 
+This project was built with Google Antigravity assistance and deployed using Google Cloud Run, Firebase Hosting, Firebase Authentication, and Firestore.
+
 ## Vertical
 
 Smart Event Experience / Crowd Management
@@ -22,6 +24,10 @@ Large events fail when people cannot see crowd pressure, routes are not adaptive
 - Forgot-password reset flow through Firebase Auth
 - Role-based routing and dashboard access
 - Firestore-backed real-time updates with API fallback
+- Google Cloud Run backend deployment for the API
+- Firebase Hosting deployment for the frontend
+- Firebase Admin-backed server-side authorization checks
+- Google Antigravity-assisted implementation workflow
 
 ## User Roles
 
@@ -114,7 +120,14 @@ Routes are scored using a weighted cost model that prefers safer, less crowded p
 - Frontend: React, Vite, React Router, Leaflet, React-Leaflet
 - Backend: Node.js, Express, Firebase Admin SDK
 - Auth and Realtime: Firebase Auth, Firestore
+- Google Services: Cloud Run, Firebase Hosting, Firestore, Firebase Authentication, Firebase Admin SDK
 - Tooling: nodemon, concurrently, firebase-tools
+
+## Built With Google Antigravity
+
+- Google Antigravity was used to accelerate feature implementation, debugging, deployment, and documentation refinement.
+- The app was then validated with live Cloud Run and Firebase Hosting deployments.
+- The final submission is designed to make the Google stack explicit for automated review.
 
 ## Repository Layout
 
@@ -191,12 +204,19 @@ Tested scenarios:
 - Emergency assistance request flow
 - Role-based route protection for `USER`, `ORGANIZER`, and `ADMIN`
 
+## Testing Strategy
+
+- Unit tests cover route scoring and crowd ordering logic.
+- Server and client workspace test scripts are available from the repository root.
+- The deployed API and hosted frontend were smoke-tested after the Cloud Run and Firebase releases.
+
 ## Accessibility and UX
 
 - Responsive layouts for desktop and mobile
 - High-contrast cards and clear action states
 - Labeled form controls and visible feedback messages
 - Color-coded heatmap plus textual density hints
+- Accessible map summaries and status text for screen reader users
 - Unified auth pages for sign up, verify email, reset password, and login
 
 ## Documentation

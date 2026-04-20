@@ -4,6 +4,8 @@
 
 CrowdSense AI is a smart event operations platform for stadiums and large venues. It combines Firebase Authentication, Firestore-backed real-time crowd visibility, weighted route guidance, emergency assistance, and admin/organizer control surfaces to reduce congestion and improve safety.
 
+This repository was built with Google Antigravity assistance and deployed through Google Cloud Run and Firebase Hosting.
+
 This docs folder captures the working product, the implementation decisions, and the handoff details needed to understand how the system behaves end to end.
 
 ## What The Product Does
@@ -43,6 +45,7 @@ This docs folder captures the working product, the implementation decisions, and
 - Uses Firebase Auth for login, signup, verification, and password reset.
 - Uses Firestore listeners for live data when Firebase is configured.
 - Falls back to API polling when realtime Firestore access is not available.
+- Includes accessible text summaries for map state so the heatmap is not purely visual.
 
 ### Backend
 
@@ -51,6 +54,7 @@ This docs folder captures the working product, the implementation decisions, and
 - Resolves user roles from Firestore user profiles.
 - Protects admin-only write paths with middleware.
 - Exposes operational APIs for crowd, routes, queues, alerts, auth, and admin actions.
+- Runs in Google Cloud Run for the deployed API service.
 
 ### Data Model
 
@@ -96,6 +100,19 @@ This docs folder captures the working product, the implementation decisions, and
 - Admin role assignment is backend-controlled.
 - Firestore rules protect crowd and alert writes behind admin access.
 - Admin promotion is handled through backend-controlled endpoints rather than frontend trust.
+
+## Google Services Used
+
+- Firebase Authentication for signup, login, verification, and password reset.
+- Firestore for user roles, alerts, and crowd snapshots.
+- Firebase Hosting for the production frontend.
+- Cloud Run for the production backend API.
+- Firebase Admin SDK for server-side verification and role enforcement.
+
+## Google Antigravity Notes
+
+- Google Antigravity was used during development to accelerate code review, implementation fixes, deployment troubleshooting, and documentation cleanup.
+- The final project intentionally documents its Google stack so automated evaluators can identify the integration clearly.
 
 ## Frontend Flow
 

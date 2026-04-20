@@ -1,4 +1,4 @@
-const stadiumLayout = require('../../shared/stadiumLayout.json');
+const stadiumLayout = require('../shared/stadiumLayout.json');
 const { readCrowdZones, seedCrowdZonesIfEmpty, writeCrowdZones } = require('./firestoreService');
 
 let lastSnapshot = stadiumLayout.zones.map((zone, index) => ({
