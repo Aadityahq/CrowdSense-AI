@@ -1,9 +1,31 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
+import { reload, sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, hasFirebaseConfig } from '../firebase';
+
+function getFirebaseLoginErrorMessage(error) {
+  const code = error?.code || '';
+
+  if (code === 'auth/invalid-email') {
+    return 'Invalid email format. Please use a valid email address.';
+  }
+
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+    return 'Invalid email or password.';
+  }
+
+  if (code === 'auth/too-many-requests') {
+    return 'Too many login attempts. Please wait and try again.';
+  }
+
+  if (code === 'auth/network-request-failed') {
+    return 'Network error while contacting Firebase. Check your connection and config.';
+  }
+
+  return error?.message || 'Authentication failed.';
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -52,19 +74,30 @@ export default function Login() {
         throw new Error('Firebase is not configured. Add VITE_FIREBASE_* values in client/.env');
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const normalizedEmail = email.trim();
+      if (!normalizedEmail.includes('@')) {
+        throw new Error('Invalid email format.');
+      }
+
+      if (!password || password.length < 6) {
+        throw new Error('Password must be at least 6 characters.');
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, password);
       const signedInUser = userCredential.user || auth.currentUser;
 
       if (!signedInUser) {
         throw new Error('Could not resolve authenticated user session. Please retry.');
       }
 
+      await reload(signedInUser);
+
       if (!signedInUser.emailVerified) {
         await sendEmailVerification(signedInUser);
         setMessage('Please verify your email before logging in. We sent a fresh verification link.');
         navigate('/verify-email', {
           replace: true,
-          state: { email: signedInUser.email || email },
+          state: { email: signedInUser.email || normalizedEmail },
         });
         return;
       }
@@ -87,11 +120,15 @@ export default function Login() {
       }
 
       localStorage.setItem('role', role);
-      localStorage.setItem('crowdsense_user', JSON.stringify({ email: signedInUser.email || email, role }));
+      localStorage.setItem('crowdsense_user', JSON.stringify({ email: signedInUser.email || normalizedEmail, role }));
       setMessage('Login successful. Redirecting...');
       redirectByRole(role);
     } catch (requestError) {
-      setError(requestError.message || 'Authentication failed.');
+      console.error('Login failed', {
+        code: requestError?.code || 'unknown',
+        message: requestError?.message || 'unknown',
+      });
+      setError(getFirebaseLoginErrorMessage(requestError));
     } finally {
       setLoading(false);
     }

@@ -193,3 +193,6 @@
 	- Updated unverified login behavior to keep session active for verification polling instead of forcing sign-out.
 	- Added guided, user-friendly copy in signup/login/verify screens so next actions are always explicit.
 	- Added visual UX refinements for auth hints, secure-access note, and verification progress messaging.
+	- Added signup input validation for email format and password minimum length before Firebase requests.
+	- Added login-side user reload before `emailVerified` checks to avoid stale auth state after verification.
+	- Added explicit Firebase error-code logging and user-friendly error mapping for signup/login failures.

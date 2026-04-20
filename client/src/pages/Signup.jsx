@@ -4,6 +4,28 @@ import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth, hasFirebaseConfig } from '../firebase';
 
+function getFirebaseSignupErrorMessage(error) {
+  const code = error?.code || '';
+
+  if (code === 'auth/email-already-in-use') {
+    return 'This email is already registered. Please login instead.';
+  }
+
+  if (code === 'auth/invalid-email') {
+    return 'Invalid email format. Please use a valid email address.';
+  }
+
+  if (code === 'auth/weak-password') {
+    return 'Password must be at least 6 characters.';
+  }
+
+  if (code === 'auth/network-request-failed') {
+    return 'Network error while contacting Firebase. Check your connection and config.';
+  }
+
+  return error?.message || 'Signup failed.';
+}
+
 export default function Signup() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -25,7 +47,16 @@ export default function Signup() {
         throw new Error('Firebase is not configured. Add VITE_FIREBASE_* values in client/.env');
       }
 
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const normalizedEmail = email.trim();
+      if (!normalizedEmail.includes('@')) {
+        throw new Error('Invalid email format.');
+      }
+
+      if (password.length < 6) {
+        throw new Error('Password must be at least 6 characters.');
+      }
+
+      const userCredential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
       const createdUser = userCredential.user;
 
       await sendEmailVerification(createdUser);
@@ -34,9 +65,13 @@ export default function Signup() {
       setName('');
       setEmail('');
       setPassword('');
-      navigate('/verify-email', { replace: true, state: { email: createdUser.email || email, name } });
+      navigate('/verify-email', { replace: true, state: { email: createdUser.email || normalizedEmail, name } });
     } catch (requestError) {
-      setError(requestError.message || 'Signup failed');
+      console.error('Signup failed', {
+        code: requestError?.code || 'unknown',
+        message: requestError?.message || 'unknown',
+      });
+      setError(getFirebaseSignupErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
