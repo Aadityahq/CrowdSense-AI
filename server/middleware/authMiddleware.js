@@ -11,16 +11,35 @@ function getFirestore() {
 }
 
 async function resolveUserProfile(decodedToken) {
+  async function toProfileFromSnapshot(snapshot) {
+    if (!snapshot.exists) {
+      return null;
+    }
+
+    const userData = snapshot.data() || {};
+    return {
+      email: typeof userData.email === 'string' && userData.email.trim() ? userData.email.trim() : null,
+      role: typeof userData.role === 'string' && userData.role.trim() ? userData.role.trim().toUpperCase() : null,
+    };
+  }
+
   try {
-    const userDoc = await getFirestore().collection('users').doc(decodedToken.uid).get();
+    const usersCollection = getFirestore().collection('users');
 
-    if (userDoc.exists) {
-      const userData = userDoc.data() || {};
+    const uidDoc = await usersCollection.doc(decodedToken.uid).get();
+    const uidProfile = await toProfileFromSnapshot(uidDoc);
+    if (uidProfile) {
+      return uidProfile;
+    }
 
-      return {
-        email: typeof userData.email === 'string' && userData.email.trim() ? userData.email.trim() : null,
-        role: typeof userData.role === 'string' && userData.role.trim() ? userData.role.trim().toUpperCase() : null,
-      };
+    // Backward compatibility for historical email-keyed user documents.
+    const email = typeof decodedToken.email === 'string' ? decodedToken.email.trim() : '';
+    if (email) {
+      const legacyDoc = await usersCollection.doc(email).get();
+      const legacyProfile = await toProfileFromSnapshot(legacyDoc);
+      if (legacyProfile) {
+        return legacyProfile;
+      }
     }
   } catch (error) {
     return {

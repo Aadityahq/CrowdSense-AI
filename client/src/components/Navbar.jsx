@@ -79,6 +79,7 @@ export default function Navbar() {
             </NavLink>
           ))}
           {isLoggedIn && role === 'ADMIN' ? <NavLink to="/admin">Admin</NavLink> : null}
+          {isLoggedIn && role === 'ORGANIZER' ? <NavLink to="/organizer">Organizer</NavLink> : null}
           {!isLoggedIn ? <NavLink to="/login">Login/SignUp</NavLink> : null}
           {isLoggedIn ? (
             <button type="button" className="secondary-btn navbar-logout-btn" onClick={handleLogout}>
