@@ -180,6 +180,10 @@ export default function Login() {
             </button>
             <Link to="/signup" className="secondary-btn auth-link-btn">Create account</Link>
           </div>
+
+          <Link to="/forgot-password" className="forgot-password-link">
+            Forgot Password?
+          </Link>
         </form>
       </section>
     </main>

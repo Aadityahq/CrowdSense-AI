@@ -198,3 +198,5 @@
 	- Added explicit Firebase error-code logging and user-friendly error mapping for signup/login failures.
 	- Added backend admin-only role management endpoint: `PATCH /api/auth/users/:uid/role` (supports USER, ORGANIZER, ADMIN).
 	- Added dedicated backend RBAC promotion API: `POST /api/admin/make-admin` with token verification and Firestore admin-role check.
+	- Added Firebase password reset flow: `ForgotPassword` page, `/forgot-password` route, and login link to send reset emails through Firebase Auth.
+	- Polished forgot-password screen with a guided hint card, cleaner back-to-login return card, and matching auth-panel styling.

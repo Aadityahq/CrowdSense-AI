@@ -796,6 +796,19 @@ button, select {
   margin: 24px auto 0;
 }
 
+.auth-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(110, 168, 254, 0.08), transparent 35%);
+  pointer-events: none;
+}
+
 .login-input {
   border-radius: 14px;
   border: 1px solid var(--border);
@@ -835,6 +848,38 @@ button, select {
 .auth-hint-card p {
   margin: 0;
   color: #d4fced;
+}
+
+.return-card {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.return-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.return-link-btn {
+  width: 100%;
+}
+
+.forgot-password-link {
+  display: inline-flex;
+  margin-top: 4px;
+  color: #9dd2ff;
+  font-size: 0.92rem;
+  width: fit-content;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
 }
 
 .verify-panel {

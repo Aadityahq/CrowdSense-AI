@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import OrganizerDashboard from './pages/OrganizerDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
 import VerifyEmail from './pages/VerifyEmail';
 
 export default function AppRoutes() {
@@ -64,6 +65,7 @@ export default function AppRoutes() {
         }
       />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="*" element={<Navigate to="/" replace />} />
