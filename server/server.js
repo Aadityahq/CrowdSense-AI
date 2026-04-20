@@ -7,6 +7,7 @@ const routeRoutes = require('./routes/routeRoutes');
 const alertRoutes = require('./routes/alertRoutes');
 const queueRoutes = require('./routes/queueRoutes');
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const { syncCrowdSnapshot } = require('./services/crowdService');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api/routes', routeRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/queues', queueRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: err.message || 'Internal server error' });

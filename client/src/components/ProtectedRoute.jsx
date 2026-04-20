@@ -23,13 +23,13 @@ export default function ProtectedRoute({ children, allowedRole, allowedRoles }) 
   }, []);
 
   const configuredRoles = Array.isArray(allowedRoles)
-    ? allowedRoles
+    ? allowedRoles.map((item) => String(item || '').trim().toUpperCase())
     : allowedRole
-      ? [allowedRole]
+      ? [String(allowedRole || '').trim().toUpperCase()]
       : [];
 
   const storedRole = localStorage.getItem('role');
-  const role = (storedRole || 'USER').toUpperCase();
+  const role = String(storedRole || 'USER').trim().toUpperCase();
 
   if (!isReady) {
     return <div className="page"><p className="muted">Checking session...</p></div>;

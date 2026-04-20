@@ -4,6 +4,10 @@ import { reload, sendEmailVerification } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, hasFirebaseConfig } from '../firebase';
 
+function normalizeRole(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
 export default function VerifyEmail() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -56,7 +60,7 @@ export default function VerifyEmail() {
 
           const profileRef = doc(db, 'users', auth.currentUser.uid);
           const profileSnap = await getDoc(profileRef);
-          const role = (profileSnap.data()?.role || 'USER').toUpperCase();
+          const role = normalizeRole(profileSnap.data()?.role || 'USER');
 
           localStorage.setItem('role', role);
           localStorage.setItem('crowdsense_user', JSON.stringify({

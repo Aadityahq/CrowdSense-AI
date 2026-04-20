@@ -5,6 +5,10 @@ import { reload, sendEmailVerification, signInWithEmailAndPassword } from 'fireb
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, hasFirebaseConfig } from '../firebase';
 
+function normalizeRole(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
 function getFirebaseLoginErrorMessage(error) {
   const code = error?.code || '';
 
@@ -36,7 +40,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   function redirectByRole(role) {
-    const target = role === 'ADMIN' ? '/admin' : role === 'ORGANIZER' ? '/organizer' : '/map';
+    const normalizedRole = normalizeRole(role);
+    const target = normalizedRole === 'ADMIN' ? '/admin' : normalizedRole === 'ORGANIZER' ? '/organizer' : '/map';
     navigate(target, { replace: true });
   }
 
@@ -110,12 +115,12 @@ export default function Login() {
       // Backward compatibility for older profiles keyed by email.
       let role = 'USER';
       if (uidProfileSnap.exists()) {
-        role = uidProfileSnap.data().role || 'USER';
+        role = normalizeRole(uidProfileSnap.data().role || 'USER');
       } else {
         const legacyProfileRef = doc(db, 'users', signedInUser.email || email);
         const legacyProfileSnap = await getDoc(legacyProfileRef);
         if (legacyProfileSnap.exists()) {
-          role = legacyProfileSnap.data().role || 'USER';
+          role = normalizeRole(legacyProfileSnap.data().role || 'USER');
         }
       }
 

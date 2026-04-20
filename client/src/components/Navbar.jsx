@@ -12,10 +12,14 @@ const links = [
   { to: '/emergency', label: 'Emergency' },
 ];
 
+function normalizeRole(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
 export default function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(!hasFirebaseConfig ? Boolean(localStorage.getItem('crowdsense_token')) : false);
-  const [role, setRole] = useState((localStorage.getItem('role') || '').toUpperCase());
+  const [role, setRole] = useState(normalizeRole(localStorage.getItem('role')));
 
   useEffect(() => {
     if (!hasFirebaseConfig || !auth) {
@@ -35,7 +39,7 @@ export default function Navbar() {
         return;
       }
 
-      const storedRole = (localStorage.getItem('role') || '').toUpperCase();
+      const storedRole = normalizeRole(localStorage.getItem('role'));
       if (storedRole) {
         setRole(storedRole);
         return;
@@ -43,7 +47,7 @@ export default function Navbar() {
 
       try {
         const profile = JSON.parse(localStorage.getItem('crowdsense_user') || '{}');
-        const localRole = (profile?.role || '').toUpperCase();
+        const localRole = normalizeRole(profile?.role || '');
         if (localRole) {
           setRole(localRole);
           return;
@@ -53,7 +57,7 @@ export default function Navbar() {
           // Resolve from Firestore so dashboard links are available even after refresh/new session.
           const uidProfileSnap = await getDoc(doc(db, 'users', user.uid));
           if (uidProfileSnap.exists()) {
-            const remoteRole = (uidProfileSnap.data()?.role || 'USER').toUpperCase();
+            const remoteRole = normalizeRole(uidProfileSnap.data()?.role || 'USER');
             setRole(remoteRole);
             localStorage.setItem('role', remoteRole);
             localStorage.setItem('crowdsense_user', JSON.stringify({
@@ -67,7 +71,7 @@ export default function Navbar() {
           if (emailKey) {
             const legacyProfileSnap = await getDoc(doc(db, 'users', emailKey));
             if (legacyProfileSnap.exists()) {
-              const legacyRole = (legacyProfileSnap.data()?.role || 'USER').toUpperCase();
+              const legacyRole = normalizeRole(legacyProfileSnap.data()?.role || 'USER');
               setRole(legacyRole);
               localStorage.setItem('role', legacyRole);
               localStorage.setItem('crowdsense_user', JSON.stringify({
