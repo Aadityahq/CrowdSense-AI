@@ -59,7 +59,7 @@ button, select {
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 2000;
   backdrop-filter: blur(14px);
   background: rgba(5, 11, 20, 0.78);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -646,6 +646,8 @@ button, select {
 
 .map-shell {
   position: relative;
+  z-index: 1;
+  isolation: isolate;
   width: 100%;
   border-radius: 24px;
   overflow: hidden;
@@ -852,6 +854,28 @@ button, select {
   margin-top: 4px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-header-panel {
+  display: grid;
+  gap: 10px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(13, 23, 43, 0.96), rgba(8, 16, 30, 0.95));
+  border: 1px solid rgba(110, 168, 254, 0.25);
+}
+
+.admin-header-panel h2 {
+  margin: 0;
+}
+
+.admin-header-panel p {
+  margin: 0;
+}
+
+.admin-side > .muted {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .session-debug-output {

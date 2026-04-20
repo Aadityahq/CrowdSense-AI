@@ -8,9 +8,6 @@ export default function AdminDashboard() {
   const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [session, setSession] = useState(null);
-  const [sessionError, setSessionError] = useState('');
-  const [sessionLoading, setSessionLoading] = useState(false);
   const [selectedZoneId, setSelectedZoneId] = useState('');
   const [densityValue, setDensityValue] = useState(55);
   const [queueValue, setQueueValue] = useState(10);
@@ -62,21 +59,6 @@ export default function AdminDashboard() {
   const highDensityZones = zones.filter((zone) => zone.density >= 75).length;
   const totalCrowd = zones.reduce((sum, zone) => sum + zone.density, 0);
   const selectedZone = zones.find((zone) => zone.id === selectedZoneId) || null;
-
-  async function handleCheckSession() {
-    try {
-      setSessionLoading(true);
-      setSessionError('');
-
-      const payload = await api.getAuthSession();
-      setSession(payload);
-    } catch (requestError) {
-      setSession(null);
-      setSessionError(requestError.message || 'Could not verify backend session.');
-    } finally {
-      setSessionLoading(false);
-    }
-  }
 
   async function handleCrowdUpdate(event) {
     event.preventDefault();
@@ -152,8 +134,11 @@ export default function AdminDashboard() {
   return (
     <main className="page admin-layout">
       <section className="admin-main">
-        <h2>Admin Dashboard</h2>
-        <p>Monitor venue pressure, zone hotspots, and live risk signals.</p>
+        <div className="panel admin-header-panel">
+          <span className="badge blue-badge">Admin Control Center</span>
+          <h2>Admin Dashboard</h2>
+          <p>Monitor venue pressure, update live zone values, and broadcast validated alerts.</p>
+        </div>
 
         <div className="panel-grid">
           <div className="metric"><label>Total crowd load</label><strong>{Math.round(totalCrowd)}%</strong></div>
@@ -217,6 +202,7 @@ export default function AdminDashboard() {
 
       <aside className="panel stack admin-side">
         <span className="section-label">Broadcast controls</span>
+        <p className="muted">Only admin users can push zone edits and send event-wide notifications.</p>
 
         <form className="panel stack session-debug-panel" onSubmit={handleSendAlert}>
           <span className="section-label">Send alert</span>
@@ -259,16 +245,6 @@ export default function AdminDashboard() {
           {alertActionState.error ? <p className="error-text">{alertActionState.error}</p> : null}
           {alertActionState.success ? <p className="success-text">{alertActionState.success}</p> : null}
         </form>
-
-        <div className="panel session-debug-panel">
-          <span className="section-label">Auth debug</span>
-          <p className="muted">Verify Firebase token forwarding and backend role resolution.</p>
-          <button type="button" className="secondary-btn" onClick={handleCheckSession} disabled={sessionLoading}>
-            {sessionLoading ? 'Checking session...' : 'Check backend session'}
-          </button>
-          {sessionError ? <p className="error-text">{sessionError}</p> : null}
-          {session ? <pre className="session-debug-output">{JSON.stringify(session, null, 2)}</pre> : null}
-        </div>
       </aside>
     </main>
   );

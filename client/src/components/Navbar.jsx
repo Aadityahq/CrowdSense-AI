@@ -14,6 +14,7 @@ const links = [
 export default function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(!hasFirebaseConfig ? Boolean(localStorage.getItem('crowdsense_token')) : false);
+  const [role, setRole] = useState((localStorage.getItem('role') || '').toUpperCase());
 
   useEffect(() => {
     if (!hasFirebaseConfig || !auth) {
@@ -22,6 +23,24 @@ export default function Navbar() {
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsLoggedIn(Boolean(user));
+
+      if (!user) {
+        setRole('');
+        return;
+      }
+
+      const storedRole = (localStorage.getItem('role') || '').toUpperCase();
+      if (storedRole) {
+        setRole(storedRole);
+        return;
+      }
+
+      try {
+        const profile = JSON.parse(localStorage.getItem('crowdsense_user') || '{}');
+        setRole((profile?.role || '').toUpperCase());
+      } catch (error) {
+        setRole('');
+      }
     });
 
     return () => unsubscribe();
@@ -37,6 +56,7 @@ export default function Navbar() {
       localStorage.removeItem('crowdsense_user');
       localStorage.removeItem('role');
       setIsLoggedIn(false);
+      setRole('');
       navigate('/');
     }
   }
@@ -58,6 +78,7 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+          {isLoggedIn && role === 'ADMIN' ? <NavLink to="/admin">Admin</NavLink> : null}
           {!isLoggedIn ? <NavLink to="/login">Login/SignUp</NavLink> : null}
           {isLoggedIn ? (
             <button type="button" className="secondary-btn navbar-logout-btn" onClick={handleLogout}>
