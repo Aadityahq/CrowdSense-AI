@@ -30,7 +30,7 @@ export default function Signup() {
 
       await sendEmailVerification(createdUser);
 
-      setMessage('Signup successful. Verification email sent.');
+      setMessage('Account created. Verification email sent.');
       setName('');
       setEmail('');
       setPassword('');
@@ -66,6 +66,11 @@ export default function Signup() {
 
           {error ? <p className="error-text">{error}</p> : null}
           {message ? <p className="success-text">{message}</p> : null}
+
+          <div className="auth-hint-card" role="status" aria-live="polite">
+            <strong>After signup:</strong>
+            <p>Account created -&gt; Verification email sent -&gt; Verify to continue.</p>
+          </div>
 
           <div className="login-actions">
             <button type="submit" className="primary-btn" disabled={loading}>

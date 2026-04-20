@@ -812,6 +812,55 @@ button, select {
   color: #7ef0bf;
 }
 
+.auth-security-note {
+  margin-top: 8px;
+  color: #9dd2ff !important;
+  font-size: 0.92rem;
+}
+
+.auth-hint-card {
+  margin-top: 2px;
+  padding: 12px 14px;
+  border: 1px solid rgba(77, 212, 172, 0.24);
+  border-radius: 14px;
+  background: rgba(77, 212, 172, 0.08);
+}
+
+.auth-hint-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #bff9e4;
+}
+
+.auth-hint-card p {
+  margin: 0;
+  color: #d4fced;
+}
+
+.verify-panel {
+  border-color: rgba(110, 168, 254, 0.24);
+}
+
+.verify-timer {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  color: #9dd2ff !important;
+}
+
+.verify-steps {
+  padding: 12px 14px;
+  border: 1px solid rgba(110, 168, 254, 0.2);
+  border-radius: 14px;
+  background: rgba(110, 168, 254, 0.09);
+  display: grid;
+  gap: 8px;
+}
+
+.verify-steps p {
+  margin: 0;
+  color: #d8e8ff;
+}
+
 .login-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

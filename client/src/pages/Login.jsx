@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { sendEmailVerification, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, hasFirebaseConfig } from '../firebase';
 
@@ -61,12 +61,12 @@ export default function Login() {
 
       if (!signedInUser.emailVerified) {
         await sendEmailVerification(signedInUser);
-        await signOut(auth);
+        setMessage('Please verify your email before logging in. We sent a fresh verification link.');
         navigate('/verify-email', {
           replace: true,
           state: { email: signedInUser.email || email },
         });
-        throw new Error('Email not verified. We sent a new verification email.');
+        return;
       }
 
       await createUserIfNotExists(signedInUser);
@@ -102,6 +102,7 @@ export default function Login() {
       <section className="panel login-panel">
         <h2>Login</h2>
         <p>Sign in with Firebase Authentication and redirect by Firestore role.</p>
+        <p className="auth-security-note">Secure access: Email verification required</p>
 
         <form className="stack" onSubmit={handleLogin}>
           <label className="field">

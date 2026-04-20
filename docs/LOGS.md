@@ -188,3 +188,8 @@
 - Validation completed:
 	- Verified no editor errors in all modified files.
 	- Verified frontend build success after verification-flow integration.
+- Auth UX polish for demo readiness:
+	- Upgraded verify-email page with automatic verification polling (3-second interval) and auto-redirect after email is confirmed.
+	- Updated unverified login behavior to keep session active for verification polling instead of forcing sign-out.
+	- Added guided, user-friendly copy in signup/login/verify screens so next actions are always explicit.
+	- Added visual UX refinements for auth hints, secure-access note, and verification progress messaging.

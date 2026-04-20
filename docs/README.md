@@ -34,3 +34,4 @@ CrowdSense AI is designed to improve the physical event experience in large venu
 - Email verification is enforced in frontend route guards and backend token middleware.
 - Firestore user profile creation is deferred until first verified login.
 - Privileged role assignment is admin-controlled (public signup defaults to USER).
+- Verify-email screen includes resend action and auto-check redirect flow for smoother onboarding.
