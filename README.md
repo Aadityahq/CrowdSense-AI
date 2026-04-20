@@ -1,6 +1,6 @@
 # CrowdSense AI
 
-CrowdSense AI is a hackathon-ready smart stadium experience system that helps attendees navigate large venues, avoid crowded areas, reduce waiting times, and respond safely during emergencies.
+CrowdSense AI is a hackathon-ready smart stadium experience system that uses Firebase Auth and Firestore to help attendees navigate large venues, avoid crowded areas, reduce waiting times, and respond safely during emergencies.
 
 ## What it includes
 
@@ -9,6 +9,8 @@ CrowdSense AI is a hackathon-ready smart stadium experience system that helps at
 - Queue time estimates
 - Emergency guidance
 - Admin monitoring dashboard
+- Firebase Auth session handling
+- Firestore-backed real-time updates
 
 ## Repository layout
 
@@ -20,7 +22,7 @@ CrowdSense AI is a hackathon-ready smart stadium experience system that helps at
 
 ## Quick start
 
-1. Copy `.env.example` to `.env` and update values.
+1. Copy `.env.example` to `.env` and add your Firebase Web app values.
 2. Install dependencies in `client/` and `server/`.
 3. Run `npm install` at the root if you want the combined dev script.
 4. Start the app with `npm run dev`.

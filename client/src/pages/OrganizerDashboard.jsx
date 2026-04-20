@@ -47,6 +47,8 @@ export default function OrganizerDashboard() {
   const totalCrowd = zones.reduce((sum, zone) => sum + zone.density, 0);
   const highRiskZones = zones.filter((zone) => zone.density >= 75).length;
   const avgDensity = zones.length ? Math.round(totalCrowd / zones.length) : 0;
+  const mostCrowdedZone = zones.reduce((max, zone) => (max && max.density >= zone.density ? max : zone), null);
+  const leastCrowdedZone = zones.reduce((min, zone) => (min && min.density <= zone.density ? min : zone), null);
 
   return (
     <main className="page admin-layout">
@@ -59,6 +61,25 @@ export default function OrganizerDashboard() {
           <div className="metric"><label>Average density</label><strong>{avgDensity}%</strong></div>
           <div className="metric"><label>High risk zones</label><strong>{highRiskZones}</strong></div>
           <div className="metric"><label>Status</label><strong>{highRiskZones > 1 ? 'Review' : 'Stable'}</strong></div>
+        </div>
+
+        <div className="panel-grid">
+          <div className="metric">
+            <label>Most crowded zone</label>
+            <strong>{mostCrowdedZone ? `${mostCrowdedZone.name} (${mostCrowdedZone.density}%)` : 'N/A'}</strong>
+          </div>
+          <div className="metric">
+            <label>Least crowded zone</label>
+            <strong>{leastCrowdedZone ? `${leastCrowdedZone.name} (${leastCrowdedZone.density}%)` : 'N/A'}</strong>
+          </div>
+          <div className="metric">
+            <label>Peak queue zone</label>
+            <strong>{mostCrowdedZone ? Math.round((mostCrowdedZone.queue || 0)) : 0}m</strong>
+          </div>
+          <div className="metric">
+            <label>Priority action</label>
+            <strong>{highRiskZones > 1 ? 'Deploy staff' : 'Monitor'}</strong>
+          </div>
         </div>
 
         <div className="panel mini-map-panel">
@@ -77,9 +98,9 @@ export default function OrganizerDashboard() {
       <aside className="panel stack admin-side">
         <span className="section-label">Organizer insights</span>
         <div className="stack">
-          <div className="badge green">Audience flow summary</div>
-          <div className="badge yellow">Capacity risk analysis</div>
-          <div className="badge red">Peak-time planning</div>
+          <div className="badge green">{leastCrowdedZone ? `Relief zone: ${leastCrowdedZone.name}` : 'Relief zone not available'}</div>
+          <div className="badge yellow">{mostCrowdedZone ? `Focus zone: ${mostCrowdedZone.name}` : 'Focus zone not available'}</div>
+          <div className="badge red">{highRiskZones > 0 ? `${highRiskZones} zones need intervention` : 'No high-risk zone right now'}</div>
         </div>
       </aside>
     </main>

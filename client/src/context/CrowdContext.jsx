@@ -11,9 +11,18 @@ function toFiniteNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function clampDensity(value) {
-  const density = toFiniteNumber(value, Math.floor(Math.random() * 100));
+function clampDensity(value, fallback = 30) {
+  const density = toFiniteNumber(value, fallback);
   return Math.max(0, Math.min(100, Math.round(density)));
+}
+
+function getZoneDefaults(zone) {
+  const defaultDensity = Math.max(5, Math.min(95, 30 + (zone.capacity % 40)));
+  const defaultQueue = zone.type === 'service'
+    ? Math.max(2, Math.min(24, Math.round(zone.capacity / 25)))
+    : Math.max(1, Math.min(10, Math.round(zone.capacity / 100)));
+
+  return { defaultDensity, defaultQueue };
 }
 
 function normalizeQueue(value, zoneType = 'seat', fallbackDensity = 0) {
@@ -32,8 +41,8 @@ function normalizeQueue(value, zoneType = 'seat', fallbackDensity = 0) {
 function buildSnapshot() {
   return stadiumZones.map((zone) => ({
     ...zone,
-    density: Math.max(5, Math.min(95, 30 + (zone.capacity % 40))),
-    queue: zone.type === 'service' ? Math.max(2, Math.min(24, Math.round(zone.capacity / 25))) : Math.max(1, Math.min(10, Math.round(zone.capacity / 100))),
+    density: getZoneDefaults(zone).defaultDensity,
+    queue: getZoneDefaults(zone).defaultQueue,
   }));
 }
 
@@ -42,11 +51,13 @@ function mergeWithStadiumZones(liveZones = []) {
 
   return stadiumZones.map((zone) => {
     const live = liveById.get(zone.id);
+    const { defaultDensity, defaultQueue } = getZoneDefaults(zone);
+    const density = clampDensity(live?.density, defaultDensity);
 
     return {
       ...zone,
-      density: clampDensity(live?.density),
-      queue: normalizeQueue(live?.queue, zone.type, clampDensity(live?.density)),
+      density,
+      queue: normalizeQueue(live?.queue, zone.type, density) || defaultQueue,
     };
   });
 }
@@ -56,13 +67,17 @@ function mapFirestoreZones(snapshotZones = []) {
 
   for (const zone of snapshotZones) {
     const id = zone.id || zone.name?.toLowerCase().replace(/\s+/g, '_');
+    const matchedZone = stadiumZones.find((entry) => entry.id === id);
+    const defaults = matchedZone ? getZoneDefaults(matchedZone) : { defaultDensity: 30, defaultQueue: 4 };
+    const density = clampDensity(zone.density, defaults.defaultDensity);
+
     zonesById.set(id, {
       id,
       name: zone.name || 'Zone',
       lat: zone.lat,
       lng: zone.lng,
-      density: clampDensity(zone.density),
-      queue: normalizeQueue(zone.queue, zone.type, clampDensity(zone.density)),
+      density,
+      queue: normalizeQueue(zone.queue, matchedZone?.type || 'seat', density) || defaults.defaultQueue,
       updatedAt: zone.updatedAt || null,
     });
   }
@@ -71,7 +86,12 @@ function mapFirestoreZones(snapshotZones = []) {
     const firestoreZone = zonesById.get(zone.id);
 
     if (!firestoreZone) {
-      return zone;
+      const { defaultDensity, defaultQueue } = getZoneDefaults(zone);
+      return {
+        ...zone,
+        density: defaultDensity,
+        queue: defaultQueue,
+      };
     }
 
     return {

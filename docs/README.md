@@ -2,12 +2,13 @@
 
 ## Overview
 
-CrowdSense AI is designed to improve the physical event experience in large venues by combining real-time crowd visibility, route optimization, queue guidance, and emergency coordination.
+CrowdSense AI is designed to improve the physical event experience in large venues by combining Firebase Auth, Firestore-backed real-time crowd visibility, route optimization, queue guidance, and emergency coordination.
 
 ## Core modules
 
 - Attendee web app
 - Admin dashboard
+- Firebase Auth session flow
 - Real-time crowd data layer
 - Route and prediction logic
 

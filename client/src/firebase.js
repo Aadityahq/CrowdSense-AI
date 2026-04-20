@@ -2,11 +2,25 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+function isConfigured(value) {
+  if (!value) return false;
+
+  const trimmed = String(value).trim();
+
+  if (!trimmed) return false;
+  if (trimmed.startsWith('YOUR_')) return false;
+  if (trimmed.startsWith('REPLACE_WITH_')) return false;
+
+  return true;
+}
+
 const hasFirebaseConfig = Boolean(
-  import.meta.env.VITE_FIREBASE_API_KEY &&
-  import.meta.env.VITE_FIREBASE_PROJECT_ID &&
-  import.meta.env.VITE_FIREBASE_API_KEY !== 'YOUR_API_KEY' &&
-  import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'YOUR_PROJECT_ID',
+  isConfigured(import.meta.env.VITE_FIREBASE_API_KEY) &&
+  isConfigured(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN) &&
+  isConfigured(import.meta.env.VITE_FIREBASE_PROJECT_ID) &&
+  isConfigured(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET) &&
+  isConfigured(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID) &&
+  isConfigured(import.meta.env.VITE_FIREBASE_APP_ID),
 );
 
 let db = null;

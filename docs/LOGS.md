@@ -123,3 +123,42 @@
 - Keep logs short and factual.
 - Add one entry per work session or milestone.
 - For each date, split updates into `Morning`, `Evening`, and `Night` sections.
+
+## 2026-04-18
+
+### Evening
+
+- Performed full flow audit against target demo sequence (auth, role routing, backend token verification, real-time crowd, alerts, emergency, organizer).
+- Backend/API runtime checks (live):
+	- Verified API health and data endpoints return 200 (`/`, `/api/crowd`, `/api/alerts`, `/api/queues`, `/api/routes`).
+	- Verified protected endpoints reject unauthenticated and fake tokens (`POST /api/alerts`, `GET /api/auth/me`).
+	- Verified role-header spoofing no longer bypasses protection (`x-user-role: ADMIN` without bearer token still returns 401).
+- Architecture checks (code-level):
+	- Confirmed frontend sends Firebase ID token in API requests.
+	- Confirmed backend verifies Firebase ID token and resolves role via Firestore user profile.
+	- Confirmed role-based route redirection exists in login flow.
+	- Confirmed crowd and alerts pages subscribe to Firestore listeners for real-time updates.
+	- Confirmed route algorithm uses weighted cost formula: distance + (crowd_density * 0.5).
+- Gaps found and recorded in bug tracker:
+	- Added BUG-007: no manual admin crowd-zone update flow.
+	- Added BUG-008: no admin alert-create UI wired to protected backend endpoint.
+	- Added BUG-009: no toast/notification on new alerts.
+	- Added BUG-010: emergency mode uses hardcoded start node A1.
+	- Added BUG-011: positive /api/auth/me path still needs real token verification from browser session.
+
+### Night
+
+- Implemented priority integration fixes from audit findings:
+	- Added admin alert broadcast form in `client/src/pages/AdminDashboard.jsx` wired to `api.createAlert`.
+	- Added admin crowd-control form in `client/src/pages/AdminDashboard.jsx` with direct Firestore updates for selected zone density/queue.
+	- Added success/error action feedback for both admin flows.
+	- Upgraded emergency mode to use browser geolocation and nearest-zone mapping instead of hardcoded start node.
+	- Upgraded organizer analytics with most crowded/least crowded zone metrics and operational insight badges.
+	- Added live new-alert notification message on alerts page when unseen Firestore alert documents arrive.
+- Validation:
+	- Confirmed no file-level errors in updated frontend pages.
+	- Verified frontend production build passes successfully after all updates.
+- Documentation:
+	- Updated bug tracker statuses for BUG-007, BUG-008, BUG-009, and BUG-010 to fixed (build-level verification).
+	- Verified BUG-011 with a real Firebase ID token: GET /api/auth/me returned 200, POST /api/alerts returned 201, and POST /api/crowd/sync returned 200.
+	- Confirmed backend role resolution from Firestore users/{uid} works for an ADMIN session.

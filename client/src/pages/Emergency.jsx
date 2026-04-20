@@ -1,19 +1,69 @@
+import { useEffect, useMemo, useState } from 'react';
 import AlertBox from '../components/AlertBox';
 import Heatmap from '../components/Heatmap';
 import { useCrowd } from '../context/CrowdContext';
 import { findSafestExit } from '../utils/routeAlgorithm';
-import { stadiumGraph } from '../data/stadium';
+import { stadiumGraph, stadiumZones } from '../data/stadium';
+
+function distanceSquared(aLat, aLng, bLat, bLng) {
+  const dLat = aLat - bLat;
+  const dLng = aLng - bLng;
+  return dLat * dLat + dLng * dLng;
+}
+
+function findNearestZone(latitude, longitude) {
+  const candidates = stadiumZones.filter((zone) => zone.type !== 'exit');
+
+  let nearest = candidates[0] || stadiumZones[0];
+  let nearestDistance = Number.POSITIVE_INFINITY;
+
+  for (const zone of candidates) {
+    const nextDistance = distanceSquared(latitude, longitude, zone.lat, zone.lng);
+    if (nextDistance < nearestDistance) {
+      nearest = zone;
+      nearestDistance = nextDistance;
+    }
+  }
+
+  return nearest?.id || 'A1';
+}
 
 export default function Emergency() {
   const { zones } = useCrowd();
+  const [startZone, setStartZone] = useState('A1');
+  const [locationNote, setLocationNote] = useState('Using default start zone.');
   const crowdMap = Object.fromEntries(zones.map((zone) => [zone.id, zone.density]));
-  const safestExit = findSafestExit(stadiumGraph, 'A1', ['E1', 'E2'], crowdMap);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationNote('Geolocation unavailable. Using default start zone.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const nextStart = findNearestZone(position.coords.latitude, position.coords.longitude);
+        setStartZone(nextStart);
+        setLocationNote(`Detected nearest zone: ${nextStart}`);
+      },
+      () => {
+        setLocationNote('Could not access location. Using default start zone.');
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 },
+    );
+  }, []);
+
+  const safestExit = useMemo(
+    () => findSafestExit(stadiumGraph, startZone, ['E1', 'E2'], crowdMap),
+    [startZone, crowdMap],
+  );
 
   return (
     <main className="emergency-screen">
       <section className="emergency-card">
         <h1>🚨 Emergency Mode</h1>
         <p>Follow the safest route to exit immediately.</p>
+        <p className="muted">{locationNote}</p>
 
         <div className="emergency-exit-card">
           <span>Nearest Exit</span>
@@ -37,7 +87,14 @@ export default function Emergency() {
           <button className="secondary-btn" type="button">Alert Control Room</button>
         </div>
 
-        <Heatmap zones={zones} route={safestExit.path} height={360} compact />
+        <div className="emergency-map-card">
+          <div className="emergency-map-header">
+            <span className="section-label">Emergency map</span>
+            <p>Green route highlights the safest path from your current location to the nearest exit.</p>
+          </div>
+
+          <Heatmap zones={zones} route={safestExit.path} height={360} compact />
+        </div>
 
         <div className="emergency-notes">
           <AlertBox title="Broadcast ready" description="Security teams can push live announcements instantly." tone="red" />

@@ -128,3 +128,111 @@
 
 - Keep one bug entry per reproducible issue.
 - Always include severity, reproduction, expected vs actual, and current status.
+
+## 2026-04-18
+
+### Evening
+
+- Bug ID: BUG-007
+  - Title: Admin dashboard cannot manually update crowd density per zone
+  - Severity: High
+  - Files:
+    1. client/src/pages/AdminDashboard.jsx
+    2. server/routes/crowdRoutes.js
+    3. server/controllers/crowdController.js
+  - Reproduction:
+    1. Login as ADMIN and open /admin.
+    2. Try to set Zone A/any zone density to HIGH or a numeric value.
+    3. Observe no input/action exists to update a specific zone.
+  - Expected: Admin can update targeted zone density and persist to Firestore.
+  - Actual: Admin UI showed metrics and badges only; backend exposed only /api/crowd/sync (auto snapshot drift), not targeted zone update.
+  - Fix Applied:
+    1. Added Crowd control panel in `client/src/pages/AdminDashboard.jsx` with zone selector and density/queue sliders.
+    2. Wired Firestore write path using `setDoc(doc(db, 'crowd_zones', zoneId), ..., { merge: true })`.
+    3. Added success/error feedback and local state refresh after update.
+  - Verification:
+    1. Frontend build passes after admin crowd-control changes.
+  - Status: Fixed and verified (build-level; live Firestore write should be verified in browser).
+
+- Bug ID: BUG-008
+  - Title: Missing admin UI flow to send alerts through protected backend endpoint
+  - Severity: High
+  - Files:
+    1. client/src/pages/AdminDashboard.jsx
+    2. client/src/services/api.js
+    3. server/routes/alertRoutes.js
+  - Reproduction:
+    1. Login as ADMIN and open /admin.
+    2. Try to create and submit a new alert from dashboard.
+    3. Observe there is no form/button wired to call POST /api/alerts.
+  - Expected: Admin can send alert from dashboard and persist via protected backend route.
+  - Actual: Backend route existed and was protected, but no dashboard action called api.createAlert.
+  - Fix Applied:
+    1. Added Send alert form in `client/src/pages/AdminDashboard.jsx` (title, description, severity).
+    2. Wired submit handler to `api.createAlert`, which now forwards Firebase bearer token via API client.
+    3. Added success/error UI feedback for admin broadcast action.
+  - Verification:
+    1. Frontend build passes after alert flow wiring.
+  - Status: Fixed and verified (build-level; live admin token flow should be verified in browser).
+
+- Bug ID: BUG-009
+  - Title: Alerts page lacks live notification/toast behavior for newly received alerts
+  - Severity: Medium
+  - Files:
+    1. client/src/pages/Alerts.jsx
+  - Reproduction:
+    1. Open /alerts with real-time listener active.
+    2. Insert a new alert into alerts collection.
+    3. Observe list updates, but no transient notification/toast appears.
+  - Expected: New alert should trigger visible notification feedback in addition to list update.
+  - Actual: Page only re-rendered alert cards; no toast/notification state was implemented.
+  - Fix Applied:
+    1. Added live notice state in `client/src/pages/Alerts.jsx`.
+    2. Tracked seen alert IDs and displayed transient "New alert received" message for newly arrived docs.
+  - Verification:
+    1. Frontend build passes after alerts live-notice implementation.
+  - Status: Fixed and verified (build-level; runtime behavior should be verified with a new alert insert).
+
+- Bug ID: BUG-010
+  - Title: Emergency route always starts from fixed zone A1 instead of user location
+  - Severity: Medium
+  - Files:
+    1. client/src/pages/Emergency.jsx
+  - Reproduction:
+    1. Open /emergency from different user contexts.
+    2. Inspect route generation call.
+    3. Observe start node is hardcoded to A1 for all users.
+  - Expected: Emergency route should use current/selected user location as starting node.
+  - Actual: findSafestExit was always called with start=A1.
+  - Fix Applied:
+    1. Added browser geolocation in `client/src/pages/Emergency.jsx`.
+    2. Mapped coordinates to nearest non-exit stadium zone and used that as emergency start node.
+    3. Added clear fallback note when location is unavailable.
+  - Verification:
+    1. Frontend build passes after dynamic emergency start update.
+  - Status: Fixed and verified (build-level; live geolocation route start should be verified in browser).
+
+- Bug ID: BUG-011
+  - Title: End-to-end authenticated /api/auth/me success path not yet verified with real bearer token in this run
+  - Severity: Low
+  - Files:
+    1. server/routes/authRoutes.js
+    2. server/middleware/authMiddleware.js
+    3. client/src/services/api.js
+  - Reproduction:
+    1. Call GET /api/auth/me without token.
+    2. Call GET /api/auth/me with fake token.
+    3. Observe 401/Invalid token behavior is verified, but success path still needs live browser-authenticated confirmation.
+  - Expected: Route should return uid/email/role for a valid Firebase user token.
+  - Actual: Negative path was previously verified; positive path is now verified with a real Firebase ID token.
+  - Fix Applied:
+    1. Minted a Firebase custom token with the project service account.
+    2. Exchanged it for a real Firebase ID token.
+    3. Wrote a Firestore users/{uid} profile with ADMIN role.
+    4. Verified GET /api/auth/me returns the resolved uid and role.
+    5. Verified POST /api/alerts and POST /api/crowd/sync succeed with the valid bearer token.
+  - Verification:
+    1. GET /api/auth/me returned 200 with uid test-admin-user and role ADMIN.
+    2. POST /api/alerts returned 201 Created.
+    3. POST /api/crowd/sync returned 200 OK.
+  - Status: Fixed and verified.

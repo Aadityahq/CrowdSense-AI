@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const { connectDatabase } = require('./config/db');
 const crowdRoutes = require('./routes/crowdRoutes');
 const routeRoutes = require('./routes/routeRoutes');
 const alertRoutes = require('./routes/alertRoutes');
@@ -29,8 +28,6 @@ app.use('/api/auth', authRoutes);
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: err.message || 'Internal server error' });
 });
-
-connectDatabase();
 
 if (process.env.FIRESTORE_AUTO_SYNC !== 'false') {
   const syncIntervalMs = Number(process.env.FIRESTORE_SYNC_INTERVAL_MS || 15000);
