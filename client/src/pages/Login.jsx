@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { sendEmailVerification, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, hasFirebaseConfig } from '../firebase';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,7 +15,29 @@ export default function Login() {
 
   function redirectByRole(role) {
     const target = role === 'ADMIN' ? '/admin' : role === 'ORGANIZER' ? '/organizer' : '/map';
-    window.location.href = target;
+    navigate(target, { replace: true });
+  }
+
+  async function createUserIfNotExists(user) {
+    const profileRef = doc(db, 'users', user.uid);
+    const profileSnap = await getDoc(profileRef);
+
+    if (profileSnap.exists()) {
+      return profileSnap.data();
+    }
+
+    const derivedName = (user.displayName || user.email || '').split('@')[0] || 'Attendee';
+
+    const payload = {
+      uid: user.uid,
+      name: derivedName,
+      email: user.email || '',
+      role: 'USER',
+      createdAt: new Date().toISOString(),
+    };
+
+    await setDoc(profileRef, payload);
+    return payload;
   }
 
   async function handleLogin(event) {
@@ -34,6 +58,18 @@ export default function Login() {
       if (!signedInUser) {
         throw new Error('Could not resolve authenticated user session. Please retry.');
       }
+
+      if (!signedInUser.emailVerified) {
+        await sendEmailVerification(signedInUser);
+        await signOut(auth);
+        navigate('/verify-email', {
+          replace: true,
+          state: { email: signedInUser.email || email },
+        });
+        throw new Error('Email not verified. We sent a new verification email.');
+      }
+
+      await createUserIfNotExists(signedInUser);
 
       const uidProfileRef = doc(db, 'users', signedInUser.uid);
       const uidProfileSnap = await getDoc(uidProfileRef);

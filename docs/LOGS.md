@@ -162,3 +162,29 @@
 	- Updated bug tracker statuses for BUG-007, BUG-008, BUG-009, and BUG-010 to fixed (build-level verification).
 	- Verified BUG-011 with a real Firebase ID token: GET /api/auth/me returned 200, POST /api/alerts returned 201, and POST /api/crowd/sync returned 200.
 	- Confirmed backend role resolution from Firestore users/{uid} works for an ADMIN session.
+
+## 2026-04-20
+
+### Evening
+
+- Implemented end-to-end email verification enforcement:
+	- Updated signup flow to create Firebase account and send verification email immediately.
+	- Stopped creating Firestore user docs during signup; moved profile creation to verified login path.
+	- Added dedicated verify-email screen with resend and verification recheck actions.
+	- Added frontend route `/verify-email` and protected-route enforcement for `emailVerified`.
+- Updated login/session behavior:
+	- Blocked unverified logins from entering the app.
+	- Auto-resend verification email on unverified login attempt and redirect to verify-email flow.
+	- Added `createUserIfNotExists` on verified login to ensure `users/{uid}` profile exists.
+
+### Night
+
+- Hardened server-side auth security:
+	- Added backend middleware check for `decoded.email_verified`.
+	- Protected APIs now return `403 Email not verified` for unverified accounts.
+- Updated docs for submission readiness:
+	- Expanded root `README.md` coverage with testing, accessibility, assumptions, and secure flow notes.
+	- Updated `docs/README.md` with current security posture and verification architecture.
+- Validation completed:
+	- Verified no editor errors in all modified files.
+	- Verified frontend build success after verification-flow integration.

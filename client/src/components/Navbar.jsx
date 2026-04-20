@@ -22,9 +22,14 @@ export default function Navbar() {
     }
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(Boolean(user));
+      setIsLoggedIn(Boolean(user && user.emailVerified));
 
       if (!user) {
+        setRole('');
+        return;
+      }
+
+      if (!user.emailVerified) {
         setRole('');
         return;
       }

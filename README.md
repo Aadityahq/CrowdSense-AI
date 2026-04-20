@@ -51,11 +51,19 @@ Large events suffer from congestion, poor wayfinding, and delayed response durin
 ## Security Model
 
 - Firebase ID tokens are verified on backend protected routes.
+- Email verification is enforced before route access and API authorization.
 - Admin-only backend routes are guarded with role middleware.
 - Firestore rules enforce:
   - signed-in read access for operational collections
   - admin-only writes for `crowd_zones` and `alerts`
   - prevention of self-elevation to admin via profile writes
+
+Security features:
+
+- Email verification enforced
+- Firebase Authentication used
+- Backend validates `email_verified` claim
+- Role-based access control implemented
 
 ## Assumptions
 

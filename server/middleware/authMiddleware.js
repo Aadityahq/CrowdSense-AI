@@ -64,6 +64,11 @@ async function protect(req, res, next) {
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
+
+    if (!decoded.email_verified) {
+      return res.status(403).json({ message: 'Email not verified' });
+    }
+
     const profile = await resolveUserProfile(decoded);
 
     req.user = {

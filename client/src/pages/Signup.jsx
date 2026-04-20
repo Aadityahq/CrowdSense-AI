@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db, hasFirebaseConfig } from '../firebase';
+import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { auth, hasFirebaseConfig } from '../firebase';
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,25 +21,20 @@ export default function Signup() {
       setError('');
       setMessage('');
 
-      if (!hasFirebaseConfig || !auth || !db) {
+      if (!hasFirebaseConfig || !auth) {
         throw new Error('Firebase is not configured. Add VITE_FIREBASE_* values in client/.env');
       }
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const createdUser = userCredential.user;
 
-      await setDoc(doc(db, 'users', createdUser.uid), {
-        uid: createdUser.uid,
-        name,
-        email: createdUser.email || email,
-        role: 'USER',
-        createdAt: new Date().toISOString(),
-      });
+      await sendEmailVerification(createdUser);
 
-      setMessage('Signup successful. You can login now.');
+      setMessage('Signup successful. Verification email sent.');
       setName('');
       setEmail('');
       setPassword('');
+      navigate('/verify-email', { replace: true, state: { email: createdUser.email || email, name } });
     } catch (requestError) {
       setError(requestError.message || 'Signup failed');
     } finally {
@@ -50,7 +46,7 @@ export default function Signup() {
     <main className="page">
       <section className="panel login-panel">
         <h2>Sign Up</h2>
-        <p>Create an attendee account. Organizer and admin roles are managed securely by admins.</p>
+        <p>Create an attendee account and verify your email before first login.</p>
 
         <form className="stack" onSubmit={handleSignup}>
           <label className="field">

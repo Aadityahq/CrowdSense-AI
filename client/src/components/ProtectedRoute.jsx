@@ -6,6 +6,7 @@ import { auth, hasFirebaseConfig } from '../firebase';
 export default function ProtectedRoute({ children, allowedRole, allowedRoles }) {
   const [isReady, setIsReady] = useState(!hasFirebaseConfig);
   const [isAuthenticated, setIsAuthenticated] = useState(!hasFirebaseConfig ? Boolean(localStorage.getItem('crowdsense_token')) : false);
+  const [isVerified, setIsVerified] = useState(!hasFirebaseConfig ? true : false);
 
   useEffect(() => {
     if (!hasFirebaseConfig || !auth) {
@@ -14,6 +15,7 @@ export default function ProtectedRoute({ children, allowedRole, allowedRoles }) 
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAuthenticated(Boolean(user));
+      setIsVerified(Boolean(user?.emailVerified));
       setIsReady(true);
     });
 
@@ -35,6 +37,10 @@ export default function ProtectedRoute({ children, allowedRole, allowedRoles }) 
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!isVerified) {
+    return <Navigate to="/verify-email" replace />;
   }
 
   if (configuredRoles.length > 0 && !configuredRoles.includes(role)) {
