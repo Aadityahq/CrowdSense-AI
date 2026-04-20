@@ -1,124 +1,223 @@
 # CrowdSense AI
 
-CrowdSense AI is a full-stack smart event management platform for stadiums and large venues. It combines Firebase Auth, Firestore real-time updates, and AI-assisted route logic to reduce congestion, improve navigation, and support emergency response.
+CrowdSense AI is a full-stack smart event management platform for stadiums and large venues. It combines Firebase Authentication, Firestore real-time updates, and weighted route guidance to reduce congestion, improve navigation, and support emergency response.
 
 ## Vertical
 
 Smart Event Experience / Crowd Management
 
-## Repository Layout
+## What It Solves
 
-- `client/` - React + Vite frontend
-- `server/` - Node.js + Express API
-- `docs/` - architecture notes, logs, and execution docs
-- `shared/` - shared static data (zones, exits, routes)
-- `scripts/` - local helper scripts
+Large events fail when people cannot see crowd pressure, routes are not adaptive, and emergency handling is slow. CrowdSense AI gives attendees live crowd visibility, safer navigation, and direct emergency assistance while giving admins and organizers operational control.
 
-## Problem Statement
+## Core Features
 
-Large events suffer from congestion, poor wayfinding, and delayed response during emergencies. Attendees often move blindly into dense zones while organizers lack real-time visibility to act early.
-
-## Approach and Core Logic
-
-1. **Real-time crowd visibility**
-	Crowd zone snapshots are published to Firestore and streamed to clients via `onSnapshot` (with API polling fallback).
-
-2. **Role-based control model**
-	- `USER`: can view crowd state, receive safer routes, and request emergency assistance.
-	- `ORGANIZER`: operational visibility and management actions.
-	- `ADMIN`: can publish alerts and update operational crowd data.
-
-3. **Smart routing using weighted cost**
-	Candidate paths are scored by a weighted function using crowd density and queue pressure. The lowest-cost safe path is shown to the attendee.
-
-## How It Works
-
-1. User logs in with Firebase Auth.
-2. Frontend loads crowd zones and alert stream.
-3. Heatmap and zone cards reflect live occupancy.
-4. Admin/organizer actions update Firestore/API state.
-5. Users get updated route recommendations.
-6. During emergency, user can trigger "Alert Control Room" and receive safe-exit guidance.
-
-## Key Features
-
-- Live heatmap for crowd density
+- Live crowd heatmaps and zone cards
+- Weighted safe-route recommendations
 - Queue pressure and congestion visibility
-- Route recommendation toward safer exits
-- Emergency mode and assistance request flow
-- Role-aware dashboards and protected APIs
+- Emergency assistance request flow for attendees
+- Admin alert publishing
+- Organizer dashboard for operations and analytics
+- Firebase email verification flow
+- Forgot-password reset flow through Firebase Auth
+- Role-based routing and dashboard access
+- Firestore-backed real-time updates with API fallback
 
-## Security Model
+## User Roles
 
-- Firebase ID tokens are verified on backend protected routes.
-- Email verification is enforced before route access and API authorization.
-- Admin-only backend routes are guarded with role middleware.
-- Firestore rules enforce:
-  - signed-in read access for operational collections
-  - admin-only writes for `crowd_zones` and `alerts`
-  - prevention of self-elevation to admin via profile writes
+- `USER`: view crowd status, use routes, and request emergency assistance
+- `ORGANIZER`: access organizer dashboard and operational views
+- `ADMIN`: publish alerts, sync crowd data, and manage roles
 
-Security features:
+## Authentication Flow
 
-- Email verification enforced
-- Firebase Authentication used
-- Backend validates `email_verified` claim
-- Role-based access control implemented
+1. User signs up with Firebase Auth.
+2. Firebase sends an email verification link.
+3. Verified users can log in and are routed by Firestore role.
+4. Unverified users are redirected to the verification page.
+5. Users can request a password reset from the login screen.
+
+## Role and Security Model
+
+- Firebase ID tokens are verified on the backend.
+- Backend checks `email_verified` before allowing protected APIs.
+- Firestore stores user profiles at `users/{uid}` with `email` and `role`.
+- Public signup defaults to `USER` only.
+- Admin role assignment is backend-controlled.
+- Firestore rules protect crowd and alert writes behind admin access.
+
+## Main Screens
+
+### Public / Auth
+
+- Home
+- Login
+- Sign Up
+- Verify Email
+- Forgot Password
+
+### Protected App
+
+- Map
+- Navigation
+- Alerts
+- Emergency
+- Admin Dashboard
+- Organizer Dashboard
+
+## Frontend Flow
+
+- Crowd data loads from Firestore when configured, otherwise from API polling.
+- Heatmap and route views update live as crowd state changes.
+- Emergency screen shows safer exit guidance and allows control-room assistance requests.
+- Navbar shows role-aware dashboard links after login.
+
+## Backend Flow
+
+- Express API serves crowd, route, queue, alert, auth, and admin endpoints.
+- Firebase Admin SDK verifies tokens and resolves user roles from Firestore.
+- Admin-only APIs are protected with token verification and role checks.
+- Crowd sync can be pushed by admins into Firestore.
+
+## API Routes
+
+### Public
+
+- `GET /` - health message
+- `GET /api/crowd` - current crowd data
+- `GET /api/routes` - suggested routes
+- `GET /api/queues` - queue data
+- `GET /api/alerts` - alert list
+
+### Protected
+
+- `GET /api/auth/me` - current verified session
+- `POST /api/alerts/emergency-assistance` - emergency assistance request
+- `POST /api/alerts` - create admin alert
+- `POST /api/crowd/sync` - sync crowd snapshot as admin
+- `PATCH /api/auth/users/:uid/role` - admin role update endpoint
+- `POST /api/admin/make-admin` - dedicated admin promotion endpoint
+
+## Smart Routing Logic
+
+Routes are scored using a weighted cost model that prefers safer, less crowded paths. The safest exit is shown during emergency mode, and the guidance adapts as crowd conditions change.
 
 ## Assumptions
 
-- Crowd density values are simulated for demo conditions.
-- A venue can be represented as bounded zones and exits.
-- User device location/zone is approximated by selected source zone.
-- Network quality is sufficient for periodic sync.
+- Crowd density is simulated for demo conditions.
+- The venue is represented as a bounded set of zones and exits.
+- User location is approximated by selected zone or browser geolocation.
+- Network access is available for Firebase authentication and Firestore sync.
+
+## Tech Stack
+
+- Frontend: React, Vite, React Router, Leaflet, React-Leaflet
+- Backend: Node.js, Express, Firebase Admin SDK
+- Auth and Realtime: Firebase Auth, Firestore
+- Tooling: nodemon, concurrently, firebase-tools
+
+## Repository Layout
+
+- `client/` - React frontend
+- `server/` - Express API and Firebase Admin integration
+- `docs/` - architecture notes, logs, bugs, and planning docs
+- `shared/` - shared zone and route data
+- `scripts/` - helper scripts
+
+## Setup
+
+1. Install dependencies from the repository root:
+   - `npm install`
+2. Configure environment files:
+   - `client/.env` with real `VITE_FIREBASE_*` values and `VITE_API_URL`
+   - `server/.env` with Firebase Admin/server values as needed
+3. Make sure `server/config/serviceAccountKey.json` is present and valid for Firebase Admin.
+4. Start both apps in development:
+   - `npm run dev`
+5. If ports are stuck from a previous run:
+   - `npm run kill-ports`
+
+## Useful Scripts
+
+From the repository root:
+
+- `npm run dev` - start client and server together after clearing stale ports
+- `npm run dev:client` - start the Vite client only
+- `npm run dev:server` - start the Express server only
+- `npm run start` - start the server workspace
+- `npm run kill-ports` - clear common dev ports used by the project
+
+From the workspace packages:
+
+- `npm run build -w client` - build the production frontend bundle
+- `npm run start -w client` - start the Vite client directly
+- `npm run start -w server` - start the Express server directly
+
+## Demo Flow
+
+1. Log in as admin and update crowd or publish alerts.
+2. Log in as organizer and open the organizer dashboard.
+3. Log in as a normal user and observe live crowd changes on the map.
+4. Trigger emergency assistance and show the safe exit guidance.
+5. Demonstrate forgot-password and email verification flows.
+6. If needed, promote a user to admin using the backend-controlled role route.
+
+## Demo Credentials
+
+Use these demo credentials during judging:
+
+- Admin email: `admin@gmail.com`
+- Admin password: `123456`
+
+If you create separate organizer credentials, keep them in the same Firestore `users/{uid}` role format with `role: ORGANIZER`.
+
+## Deployment
+
+- Frontend: Firebase Hosting
+- Backend: Cloud Run or local Express server for development/demo
+- Firebase project: `crowdsense-ai-b80b9`
+
+If a judge field asks for a deployed link, prefer the live UI URL first so they can see the app experience immediately.
 
 ## Testing Summary
 
 Tested scenarios:
 
 - Signup, login, logout, and token-authenticated API calls
-- Live crowd updates reflected in map/home widgets
+- Email verification redirect flow
+- Forgot-password reset email flow
+- Live crowd updates reflected in map and dashboard widgets
 - Admin alert publishing and user-side alert visibility
-- Emergency assistance request flow from attendee screen
-- Role-based route protection (USER/ORGANIZER/ADMIN)
+- Emergency assistance request flow
+- Role-based route protection for `USER`, `ORGANIZER`, and `ADMIN`
 
 ## Accessibility and UX
 
-- Responsive layout for desktop and mobile
-- High-contrast status cards and labeled controls
+- Responsive layouts for desktop and mobile
+- High-contrast cards and clear action states
+- Labeled form controls and visible feedback messages
 - Color-coded heatmap plus textual density hints
-- Clear action states for loading, success, and error feedback
+- Unified auth pages for sign up, verify email, reset password, and login
 
-## Tech Stack
-
-- Frontend: React, Vite, React Router, Leaflet
-- Backend: Node.js, Express
-- Auth and Realtime: Firebase Auth, Firestore
-- Optional deployment target: Cloud Run / Firebase Hosting
-
-## Setup
-
-1. Install root dependencies:
-	- `npm install`
-2. Configure environment files:
-	- root `.env` as needed
-	- `client/.env` with `VITE_FIREBASE_*` and API URL
-	- `server/.env` with Firebase Admin credentials and server config
-3. Run full stack in dev mode:
-	- `npm run dev`
-4. If ports are occupied:
-	- `npm run kill-ports`
-
-## Demo Flow (Judge-Friendly)
-
-1. Login as admin and update crowd/alerts.
-2. Open attendee view and observe real-time updates.
-3. Trigger emergency action and verify assistance request is recorded.
-4. Show safer path guidance adapting to crowd conditions.
-
-## Documentation Index
+## Documentation
 
 - `docs/README.md` - docs folder overview
 - `docs/LOGS.md` - day-wise progress logs
 - `docs/bugs.md` - reproducible bug tracker and fixes
-- `docs/TODO.md` - planned tasks
+- `docs/TODO.md` - planning and execution tasks
+
+## Notes for Judges
+
+- The first admin must be assigned manually in Firestore.
+- After the first admin exists, backend-controlled role promotion can be used safely.
+- The current flow is designed to be demo-friendly, secure, and easy to explain.
+
+## Final Submission Checklist
+
+- Public GitHub repository is available and includes `client/`, `server/`, `docs/`, and this README.
+- Firebase Auth email/password sign-in is enabled.
+- Frontend env values are real, not placeholder strings.
+- Firestore rules are deployed.
+- Admin account is present in `users/{uid}` with `role: ADMIN`.
+- Demo credentials are verified before presenting.
+- The deployed UI link is the one you want judges to click first.
