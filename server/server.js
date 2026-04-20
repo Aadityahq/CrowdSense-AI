@@ -12,12 +12,19 @@ const { syncCrowdSnapshot } = require('./services/crowdService');
 
 const app = express();
 const port = process.env.PORT || 5001;
+const frontendUrl = process.env.FRONTEND_URL || 'https://crowdsense-ai-b80b9.web.app';
 
 app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.json({ message: 'CrowdSense AI API is running' });
+  res
+    .status(200)
+    .send(`
+      <h1>CrowdSense AI Backend Running</h1>
+      <p>Frontend: <a href="${frontendUrl}" target="_blank" rel="noopener noreferrer">${frontendUrl}</a></p>
+      <p>Health: OK</p>
+    `);
 });
 
 app.use('/api/crowd', crowdRoutes);
