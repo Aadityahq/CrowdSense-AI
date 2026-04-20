@@ -92,10 +92,10 @@ export default function Emergency() {
       const destinationId = safestExit.path.at(-1) || 'E1';
       const routeLabel = safestExit.path.length > 0 ? safestExit.path.join(' -> ') : 'A1 -> E1';
 
-      await api.createAlert({
-        title: 'Emergency assistance requested',
-        description: `User requested control room support. Start zone: ${startZone}. Suggested exit: ${destinationId}. Route: ${routeLabel}.`,
-        severity: 'high',
+      await api.requestEmergencyAssistance({
+        startZone,
+        destinationId,
+        routeLabel,
       });
 
       setActionNotice('Control room alert sent. Stay calm and keep following the safe route.');

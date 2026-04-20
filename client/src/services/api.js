@@ -68,5 +68,6 @@ export const api = {
   getCrowd: () => apiGet('/api/crowd'),
   getAlerts: () => apiGet('/api/alerts'),
   getAuthSession: () => apiGet('/api/auth/me'),
+  requestEmergencyAssistance: (data) => apiPost('/api/alerts/emergency-assistance', data),
   createAlert: (data) => apiPost('/api/alerts', data),
 };

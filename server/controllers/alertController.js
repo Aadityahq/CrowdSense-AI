@@ -16,4 +16,18 @@ async function createAlert(req, res) {
   return res.status(201).json(created);
 }
 
-module.exports = { getAlerts, createAlert };
+async function requestEmergencyAssistance(req, res) {
+  const { startZone, destinationId, routeLabel } = req.body || {};
+  const userRole = req.user?.role || 'USER';
+  const userEmail = req.user?.email || 'unknown-user';
+
+  const created = await alertService.createAlert({
+    title: 'Emergency assistance requested',
+    description: `Requester: ${userEmail} (${userRole}). Start zone: ${startZone || 'unknown'}. Suggested exit: ${destinationId || 'E1'}. Route: ${routeLabel || 'A1 -> E1'}.`,
+    severity: 'high',
+  });
+
+  return res.status(201).json(created);
+}
+
+module.exports = { getAlerts, createAlert, requestEmergencyAssistance };
